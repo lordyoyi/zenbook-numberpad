@@ -1,5 +1,6 @@
---- a/drivers/hid/hid-multitouch.c	2026-09-19 14:08:53.388473738 -0300
-+++ b/drivers/hid/hid-multitouch.c	2026-09-19 14:08:53.388473738 -0300
+diff --git a/drivers/hid/hid-multitouch.c b/drivers/hid/hid-multitouch.c
+--- a/drivers/hid/hid-multitouch.c
++++ b/drivers/hid/hid-multitouch.c
 @@ -39,6 +39,7 @@
  #include <linux/slab.h>
  #include <linux/input/mt.h>

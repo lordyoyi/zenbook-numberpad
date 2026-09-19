@@ -33,6 +33,10 @@ NumberPad support for the ASUS Zenbook 14 **UX3405CA** on Linux (touchpad: PixAr
   drags, two-finger scroll and physical clicks keep working (the touchpad is
   grabbed while active and pointer touches are replayed on a virtual touchpad);
   tap the top-left icon to cycle brightness. `--debug` logs touches and keys.
+- `kernel/` — `hid-multitouch` patch (`0568-hid-multitouch-asus-numberpad-led.patch`)
+  exposing the backlight as `/sys/class/leds/asus::numberpad` (brightness 0–8),
+  plus an out-of-tree build (`make`) of the patched v7.2.5 driver. The daemon
+  uses this LED when present and falls back to hidraw otherwise.
 - `numberpadd.service` — systemd unit (runs as root).
 - `probe.py` — research tool: `led on|off|0xNN`, `sniff` (decoded touch reports).
 

@@ -29,7 +29,8 @@ ICON_W, ICON_H = 300, 250  # corner icon hit boxes
 # grid margins inside the pad, device units
 TOP, BOTTOM, LEFT, RIGHT = 200, 80, 200, 200
 
-BRIGHTNESS = [0x41, 0x43, 0x45, 0x48]  # levels cycled by the left icon (0x41..0x48 valid)
+BRIGHTNESS = [2, 4, 6, 8]  # levels cycled by the left icon (hardware has 1..8)
+LED_SYSFS = "/sys/class/leds/asus::numberpad/brightness"  # present with the hid-multitouch patch
 
 # ---- linux input constants --------------------------------------------------
 EV_SYN, EV_KEY, EV_ABS = 0, 1, 3
@@ -93,13 +94,23 @@ def find_hidraw():
 
 # ---- backlight --------------------------------------------------------------
 class Backlight:
-    def __init__(self):
-        self.path = find_hidraw()
+    """Level 0 is off, 1..8 on. Uses the kernel LED class device when the
+    patched hid-multitouch provides it, else the vendor feature report via hidraw."""
 
-    def send(self, value):
+    def set(self, level):
+        if os.path.exists(LED_SYSFS):
+            with open(LED_SYSFS, "w") as f:
+                f.write(str(level))
+        elif level:
+            self._hidraw(0x01)
+            self._hidraw(0x40 + level)
+        else:
+            self._hidraw(0x00)
+
+    def _hidraw(self, value):
         # vendor feature report 0x0D (usage page 0xFF00, usage 0x06)
         buf = bytearray([0x0D, 0x14, 0x03, value, 0xAD])
-        with open(self.path, "rb+", buffering=0) as f:
+        with open(find_hidraw(), "rb+", buffering=0) as f:
             fcntl.ioctl(f, 0xC0000000 | (len(buf) << 16) | (ord("H") << 8) | 0x06, buf)
 
 
@@ -191,17 +202,15 @@ class NumberPad:
     def set_active(self, on):
         self.active = on
         try:
-            self.backlight.send(0x01 if on else 0x00)
-            if on:
-                self.backlight.send(BRIGHTNESS[self.level])
+            self.backlight.set(BRIGHTNESS[self.level] if on else 0)
         except OSError as e:
             print(f"backlight: {e}", file=sys.stderr)
         log("numberpad", "ON" if on else "OFF")
 
     def cycle_brightness(self):
         self.level = (self.level + 1) % len(BRIGHTNESS)
-        self.backlight.send(BRIGHTNESS[self.level])
-        log(f"brightness 0x{BRIGHTNESS[self.level]:02x}")
+        self.backlight.set(BRIGHTNESS[self.level])
+        log(f"brightness {BRIGHTNESS[self.level]}")
 
     def type_key(self, code):
         seq = [KEY_LEFTSHIFT, KEY_5] if code == PERCENT else [code]
@@ -333,7 +342,7 @@ class NumberPad:
             if self.grabbed:
                 fcntl.ioctl(self.src, EVIOCGRAB, 0)
             if self.active:
-                self.backlight.send(0x00)
+                self.backlight.set(0)
         finally:
             self.kbd.close()
             self.pad.close()
