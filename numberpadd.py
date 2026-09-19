@@ -24,6 +24,7 @@ TOUCHPAD_NAME = "ASUP1415:00 093A:300C Touchpad"
 
 HOLD_SECONDS = 0.6        # hold on the top-right icon to toggle
 TAP_MAX_SECONDS = 0.5     # longer stationary touches type nothing
+RESUME_POLL_SECONDS = 2   # while on, how often to check for a resume from suspend
 MOVE_THRESHOLD = 120      # device units (pad is 3996 x 2242); beyond this a touch is a pointer drag
 ICON_W, ICON_H = 300, 250  # corner icon hit boxes
 # grid margins inside the pad, device units
@@ -323,10 +324,30 @@ class NumberPad:
                 wait = left if wait is None else min(wait, left)
         return wait
 
+    @staticmethod
+    def suspended_seconds():
+        # CLOCK_BOOTTIME keeps counting during suspend, CLOCK_MONOTONIC does not
+        return time.clock_gettime(time.CLOCK_BOOTTIME) - time.monotonic()
+
+    def check_resume(self):
+        """Re-apply the LED state after a resume. Short s2idle suspends keep it,
+        but a sleep that powers the touchpad down would leave a dark pad that types."""
+        asleep = self.suspended_seconds()
+        if asleep - self.asleep > 1:
+            log("resumed from suspend")
+            if self.active:
+                self.set_active(True)
+        self.asleep = asleep
+
     def run(self):
         print(f"numberpadd: watching {TOUCHPAD_NAME} ({self.max_x}x{self.max_y})", flush=True)
+        self.asleep = self.suspended_seconds()
         while True:
+            self.check_resume()
             timeout = self.check_hold()
+            if self.active:
+                # wake up regularly so a resume is noticed without waiting for a touch
+                timeout = RESUME_POLL_SECONDS if timeout is None else min(timeout, RESUME_POLL_SECONDS)
             if not select.select([self.src], [], [], timeout)[0]:
                 continue
             try:

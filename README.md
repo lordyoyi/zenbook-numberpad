@@ -64,7 +64,11 @@ of `numberpadd.py`.
   **hidraw** (`HIDIOCSFEATURE`) from userspace, `hid_hw_raw_request()` in the
   kernel. Existing community drivers send the same bytes as a hand-rolled
   I2C-HID SET_REPORT frame with `i2ctransfer -f`, behind the kernel driver's back.
-- The touchpad drops the LED state across suspend.
+- The touchpad keeps the LED state across a short s2idle suspend (tested: lit
+  before, lit after, stock driver). With the kernel patch the LED core turns
+  the grid off on suspend and restores it on resume. The daemon re-applies its
+  state after a resume anyway, in case a deeper or longer sleep does power the
+  touchpad down — that case is untested.
 
 ## Kernel patch (optional)
 
