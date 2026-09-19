@@ -1,7 +1,1 @@
-*.o
-*.ko
-*.mod*
-.*.cmd
-Module.symvers
-modules.order
-.module-common.o
+build/
