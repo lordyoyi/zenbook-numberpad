@@ -1,0 +1,10 @@
+[Unit]
+Description=ASUS Zenbook UX3405CA NumberPad daemon
+
+[Service]
+ExecStart=/usr/local/bin/numberpadd
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
