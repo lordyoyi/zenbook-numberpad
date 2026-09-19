@@ -89,7 +89,8 @@ Needs the kernel headers (`linux-omarchy-headers` / `linux-headers`), `curl`,
 
 - `linux-omarchy`: [omacom/omarchy-pkgs#536](https://github.com/omacom/omarchy-pkgs/pull/536)
 - `asus-numberpad-driver` (hidraw instead of raw I2C):
-  [asus-linux-drivers/asus-numberpad-driver#315](https://github.com/asus-linux-drivers/asus-numberpad-driver/issues/315)
+  [asus-linux-drivers/asus-numberpad-driver#316](https://github.com/asus-linux-drivers/asus-numberpad-driver/pull/316)
+  (requested by the maintainer in [#315](https://github.com/asus-linux-drivers/asus-numberpad-driver/issues/315))
 - Mainline (linux-input): not sent yet.
 
 ## Known limits
