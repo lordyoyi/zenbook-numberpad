@@ -16,6 +16,18 @@ Two pieces:
 The UX3405MA ships the same touchpad and the same printed grid, so it should
 work there too — untested.
 
+## Is this the right project for you?
+
+[asus-numberpad-driver](https://github.com/asus-linux-drivers/asus-numberpad-driver)
+is the full-featured option: dozens of ASUS models, configurable layouts and
+gestures, calculator shortcut, runs as a normal user. Use it if you want any of
+that, or if your laptop is not a UX3405.
+
+This project is the minimal take for one laptop: a single file with no
+dependencies, the backlight driven through the regular HID path instead of raw
+I2C writes, and a kernel patch aiming to make that part native. The hidraw
+approach found here was contributed back to that driver (see Upstream status).
+
 ## Using it
 
 - **Turn on / off:** rest a finger on the top-right icon for about half a second.
